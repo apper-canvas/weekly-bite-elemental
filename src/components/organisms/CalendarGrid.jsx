@@ -19,9 +19,12 @@ const CalendarGrid = ({
 }) => {
   const [meals, setMeals] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const [error, setError] = useState("");
   const [recipeLookup, setRecipeLookup] = useState({});
-
+  const [duplicateModal, setDuplicateModal] = useState({
+    isOpen: false,
+    sourceDay: ""
+  });
   const weekDays = getWeekDays(currentWeek);
   const mealTypes = ["breakfast", "lunch", "dinner", "snacks"];
 
@@ -97,15 +100,29 @@ const CalendarGrid = ({
     }
   };
 
-  const handleCopyDay = async (fromDay, toDay) => {
+const handleDuplicateDay = (sourceDay) => {
+    setDuplicateModal({
+      isOpen: true,
+      sourceDay
+    });
+  };
+
+  const handleDuplicateConfirm = async (fromDay, toDay) => {
     try {
       await mealPlanService.copyDay(currentWeek, fromDay, toDay);
       await loadWeekPlan(); // Reload to get updated data
-      toast.success(`Copied meals from ${getDayName(new Date(fromDay))} to ${getDayName(new Date(toDay))}`);
+      toast.success(`Duplicated meals from ${getDayName(new Date(fromDay))} to ${getDayName(new Date(toDay))}`);
     } catch (err) {
-      toast.error("Failed to copy day");
-      console.error("Failed to copy day:", err);
+      toast.error("Failed to duplicate day");
+      console.error("Failed to duplicate day:", err);
     }
+  };
+
+  const handleCloseDuplicateModal = () => {
+    setDuplicateModal({
+      isOpen: false,
+      sourceDay: ""
+    });
   };
 
   const getMealsForDay = (day) => {
@@ -167,7 +184,7 @@ const CalendarGrid = ({
     <div className="space-y-6">
       {/* Calendar Grid - Desktop */}
       <div className="hidden md:grid md:grid-cols-7 gap-4">
-        {weekDays.map((day, dayIndex) => {
+{weekDays.map((day, dayIndex) => {
           const dayStr = formatDate(day);
           const dayMeals = getMealsForDay(day);
           const totalCalories = getTotalDayCalories(day);
@@ -207,14 +224,9 @@ const CalendarGrid = ({
                           size="sm"
                           variant="ghost"
                           icon="Copy"
-                          onClick={() => {
-                            // Simple copy to next day
-                            const nextDay = weekDays[dayIndex + 1];
-                            if (nextDay) {
-                              handleCopyDay(dayStr, formatDate(nextDay));
-                            }
-                          }}
+                          onClick={() => handleDuplicateDay(dayStr)}
                           className="w-8 h-8 p-0"
+                          title="Duplicate day to another day"
                         />
                       </div>
                     </>
@@ -250,7 +262,7 @@ const CalendarGrid = ({
 
           return (
             <motion.div
-              key={dayStr}
+key={dayStr}
               className="bg-white rounded-xl shadow-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -268,14 +280,27 @@ const CalendarGrid = ({
                     </p>
                   </div>
                   
-                  {hasMeals && (
-                    <div className="text-right">
-                      <div className="text-xs text-gray-500">Total</div>
-                      <div className="text-sm font-semibold text-primary">
-                        {totalCalories} cal
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {hasMeals && (
+                      <>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-500">Total</div>
+                          <div className="text-sm font-semibold text-primary">
+                            {totalCalories} cal
+                          </div>
+                        </div>
+                        
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon="Copy"
+                          onClick={() => handleDuplicateDay(dayStr)}
+                          className="w-8 h-8 p-0"
+                          title="Duplicate day"
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Header from "./Header";
 import Navigation from "./Navigation";
 import RecipeModal from "./RecipeModal";
-
+import DuplicateDayModal from "./DuplicateDayModal";
 const Layout = () => {
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
 
