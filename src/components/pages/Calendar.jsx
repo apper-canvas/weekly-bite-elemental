@@ -177,13 +177,11 @@ if (error) {
         />
       </motion.div>
 
-      {/* Favorites Sidebar */}
+{/* Favorites Sidebar */}
       <FavoritesSidebar
         isOpen={isFavoritesOpen}
         onToggle={() => setIsFavoritesOpen(!isFavoritesOpen)}
-        className="lg:right-6"
       />
-
 {/* Recipe Selection Modal */}
       <RecipeSelectionModal
         isOpen={recipeSelectionModal.isOpen}
@@ -192,7 +190,6 @@ if (error) {
         day={recipeSelectionModal.day}
         mealType={recipeSelectionModal.mealType}
       />
-
       {/* Mobile Spacing for Bottom Navigation */}
       <div className="h-20 md:h-0" />
     </div>

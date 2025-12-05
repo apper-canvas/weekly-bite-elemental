@@ -14,7 +14,7 @@ import { cn } from "@/utils/cn";
 
 const CalendarGrid = ({ 
   currentWeek, 
-recipes = [],
+  recipes = [],
   onWeekChange,
   onAddMeal
 }) => {
@@ -234,13 +234,13 @@ title={loading ? "Loading your meal plan..." : "Start planning your week"}
 
               {/* Meal Slots */}
               <div className="space-y-3">
-                {dayMeals.map(({ mealType, recipe }) => (
+{dayMeals.map(({ mealType, recipe }) => (
                   <MealSlot
                     key={`${dayStr}-${mealType}`}
                     day={dayStr}
                     mealType={mealType}
                     recipe={recipe}
-onDrop={handleDrop}
+                    onDrop={handleDrop}
                     onRemove={handleRemoveMeal}
                     onAdd={onAddMeal}
                   />
@@ -305,13 +305,13 @@ key={dayStr}
 
               {/* Mobile Meal Slots */}
               <div className="p-4 space-y-3">
-                {dayMeals.map(({ mealType, recipe }) => (
+{dayMeals.map(({ mealType, recipe }) => (
                   <MealSlot
                     key={`${dayStr}-${mealType}`}
                     day={dayStr}
                     mealType={mealType}
                     recipe={recipe}
-onDrop={handleDrop}
+                    onDrop={handleDrop}
                     onRemove={handleRemoveMeal}
                     onAdd={onAddMeal}
                   />

@@ -10,7 +10,7 @@ const MealSlot = ({
   recipe, 
   onDrop, 
   onRemove,
-onAdd,
+  onAdd,
   className
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -79,7 +79,7 @@ const handleAdd = () => {
         onDrop={handleDrop}
 onClick={!recipe ? handleAdd : undefined}
       >
-        {recipe ? (
+{recipe ? (
           <motion.div
             className="relative bg-white rounded-lg shadow-sm overflow-hidden h-full"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -94,17 +94,22 @@ onClick={!recipe ? handleAdd : undefined}
             </button>
 
             <div className="p-3">
-              <div className="flex items-start gap-3">
+              {/* Prominent Meal Name */}
+              <div className="mb-2">
+                <h4 className="font-display font-semibold text-gray-800 text-base leading-tight">
+                  {recipe.name}
+                </h4>
+              </div>
+              
+              {/* Recipe Details */}
+              <div className="flex items-center gap-3">
                 <img
                   src={recipe.image}
                   alt={recipe.name}
-                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                  className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-800 text-sm truncate">
-                    {recipe.name}
-                  </h4>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <ApperIcon name="Clock" size={10} />
                       {recipe.prepTime}min
