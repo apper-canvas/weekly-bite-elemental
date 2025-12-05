@@ -1,23 +1,24 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getWeekStart, getWeekDays, getDayName, getWeekDateRange } from "@/utils/dateUtils";
-import NutritionCard from "@/components/molecules/NutritionCard";
-import Button from "@/components/atoms/Button";
+import { mealPlanService } from "@/services/api/mealPlanService";
+import { recipeService } from "@/services/api/recipeService";
+import { addDays, formatDate, subDays } from "date-fns";
+import Chart from "react-apexcharts";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Empty from "@/components/ui/Empty";
-import { mealPlanService } from "@/services/api/mealPlanService";
-import { recipeService } from "@/services/api/recipeService";
-import { calculateDayCalories, calculateDayMacros } from "@/utils/nutritionUtils";
-import { addDays, subDays, formatDate } from "date-fns";
-
+import Button from "@/components/atoms/Button";
+import NutritionCard from "@/components/molecules/NutritionCard";
+import { calculateDayCalories, calculateDayMacros, calculateWeekTrends, getHistoricalData } from "@/utils/nutritionUtils";
+import { getDayName, getWeekDateRange, getWeekDays, getWeekStart } from "@/utils/dateUtils";
 const Nutrition = () => {
   const [currentWeek, setCurrentWeek] = useState(getWeekStart());
   const [weekMeals, setWeekMeals] = useState({});
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [historicalData, setHistoricalData] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -63,11 +64,23 @@ const Nutrition = () => {
       });
       
       setWeekMeals(dayMeals);
+      
+      // Load historical data for trends
+      await loadHistoricalData();
     } catch (err) {
       setError(err.message);
       console.error("Failed to load nutrition data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadHistoricalData = async () => {
+    try {
+      const historical = await getHistoricalData(currentWeek);
+      setHistoricalData(historical);
+    } catch (err) {
+      console.error("Failed to load historical data:", err);
     }
   };
 
@@ -141,6 +154,108 @@ const Nutrition = () => {
       .slice(0, 3);
   };
 
+  const getCalorieTrendData = () => {
+    if (historicalData.length === 0) return null;
+
+    return {
+      options: {
+        chart: {
+          type: 'line',
+          height: 350,
+          toolbar: { show: false },
+          fontFamily: 'Inter, sans-serif'
+        },
+        colors: ['#E67E22'],
+        stroke: {
+          curve: 'smooth',
+          width: 3
+        },
+        grid: {
+          borderColor: '#f1f1f1',
+          strokeDashArray: 5
+        },
+        xaxis: {
+          categories: historicalData.map(item => item.weekLabel),
+          labels: {
+            style: { colors: '#666', fontSize: '12px' }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: { colors: '#666', fontSize: '12px' },
+            formatter: (value) => `${Math.round(value)}`
+          }
+        },
+        tooltip: {
+          y: {
+            formatter: (value) => `${Math.round(value)} calories`
+          }
+        },
+        markers: {
+          size: 6,
+          colors: ['#E67E22'],
+          strokeColors: '#fff',
+          strokeWidth: 2,
+          hover: { size: 8 }
+        }
+      },
+      series: [{
+        name: 'Daily Average Calories',
+        data: historicalData.map(item => item.avgCalories)
+      }]
+    };
+  };
+
+  const getMacroChartData = () => {
+    const { avgMacros } = getDailyAverages();
+    
+    return {
+      options: {
+        chart: {
+          type: 'donut',
+          height: 300,
+          fontFamily: 'Inter, sans-serif'
+        },
+        colors: ['#3498DB', '#27AE60', '#F39C12'],
+        labels: ['Protein', 'Carbs', 'Fat'],
+        legend: {
+          position: 'bottom',
+          fontSize: '12px'
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              size: '70%',
+              labels: {
+                show: true,
+                total: {
+                  show: true,
+                  label: 'Total Macros',
+                  color: '#666',
+                  formatter: () => `${Math.round(avgMacros.protein + avgMacros.carbs + avgMacros.fat)}g`
+                }
+              }
+            }
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (val) => `${Math.round(val)}%`
+        },
+        tooltip: {
+          y: {
+            formatter: (value, { seriesIndex }) => {
+              const macroNames = ['protein', 'carbs', 'fat'];
+              const macroValues = [avgMacros.protein, avgMacros.carbs, avgMacros.fat];
+              return `${Math.round(macroValues[seriesIndex])}g`;
+            }
+          }
+        }
+      },
+      series: [avgMacros.protein, avgMacros.carbs, avgMacros.fat]
+    };
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -148,16 +263,18 @@ const Nutrition = () => {
   if (error) {
     return (
       <ErrorView
-        title="Failed to load nutrition data"
+        title="Failed to Load Nutrition Data"
         message={error}
         onRetry={loadData}
       />
     );
   }
 
-  const weekDays = getWeekDays(currentWeek);
+const weekDays = getWeekDays(currentWeek);
   const weekTotals = getWeekTotals();
   const dailyAverages = getDailyAverages();
+  const trendData = getCalorieTrendData();
+  const macroData = getMacroChartData();
   const topRecipes = getMostCookedRecipes();
   const hasMeals = Object.values(weekMeals).some(meals => meals.length > 0);
 
@@ -190,8 +307,7 @@ const Nutrition = () => {
       </div>
     );
   }
-
-  return (
+return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <motion.div
@@ -297,12 +413,85 @@ const Nutrition = () => {
         </div>
       </motion.div>
 
-      {/* Daily Breakdown */}
+      {/* Trend Charts */}
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        {/* Calorie Trend Chart */}
+        <div className="bg-white rounded-xl shadow-card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center">
+              <ApperIcon name="TrendingUp" size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-gray-800">
+                Weekly Calorie Trends
+              </h3>
+              <p className="text-sm text-gray-600">
+                Daily average over time
+              </p>
+            </div>
+          </div>
+          
+          {trendData && historicalData.length > 0 ? (
+            <Chart
+              options={trendData.options}
+              series={trendData.series}
+              type="line"
+              height={350}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[350px] text-gray-500">
+              <div className="text-center">
+                <ApperIcon name="BarChart3" size={48} className="mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Trend data will appear after planning multiple weeks</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Macro Breakdown Chart */}
+        <div className="bg-white rounded-xl shadow-card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-secondary to-green-600 rounded-lg flex items-center justify-center">
+              <ApperIcon name="PieChart" size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-gray-800">
+                Average Macro Breakdown
+              </h3>
+              <p className="text-sm text-gray-600">
+                Daily macro distribution
+              </p>
+            </div>
+          </div>
+          
+          {dailyAverages.avgCalories > 0 ? (
+            <Chart
+              options={macroData.options}
+              series={macroData.series}
+              type="donut"
+              height={300}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-gray-500">
+              <div className="text-center">
+                <ApperIcon name="PieChart" size={48} className="mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Plan some meals to see macro breakdown</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+{/* Daily Breakdown */}
       <motion.div
         className="bg-white rounded-xl shadow-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
+        transition={{ delay: 0.3, duration: 0.3 }}
       >
         <div className="p-6 border-b border-gray-200">
           <h3 className="font-display font-semibold text-gray-800 text-lg">
