@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* React Toastify Custom Styling */
+.Toastify__toast {
+  padding: 16px;
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 8px;
+}
+
+.Toastify__toast--success {
+  background: #27AE60;
+  color: white;
+}
+
+.Toastify__toast--error {
+  background: #E74C3C;
+  color: white;
+}
+
+.Toastify__toast--warning {
+  background: #F39C12;
+  color: white;
+}
+
+.Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E67E22;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d35f0a;
+}
+
+/* Drag and Drop Styles */
+.drag-preview {
+  transform: rotate(2deg);
+  opacity: 0.9;
+  z-index: 1000;
+}
+
+.drop-zone {
+  transition: all 0.2s ease;
+}
+
+.drop-zone.active {
+  border-color: #E67E22;
+  background-color: rgba(230, 126, 34, 0.05);
+  transform: scale(1.02);
+}
+
+.drop-zone.hover {
+  border-color: #E67E22;
+  background-color: rgba(230, 126, 34, 0.1);
+  box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+}
+
+/* Recipe Card Hover Effect */
+.recipe-card {
+  transition: all 0.3s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Button Press Effect */
+.button-press {
+  transition: transform 0.12s ease;
+}
+
+.button-press:active {
+  transform: scale(0.97);
+}
+
+/* Meal Type Colors */
+.meal-breakfast {
+  background: linear-gradient(135deg, #F39C12 0%, #F1C40F 100%);
+}
+
+.meal-lunch {
+  background: linear-gradient(135deg, #E67E22 0%, #F39C12 100%);
+}
+
+.meal-dinner {
+  background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
+}
+
+.meal-snacks {
+  background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
+}
+
+/* Animation Classes */
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
