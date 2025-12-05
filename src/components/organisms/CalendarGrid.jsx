@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getWeekDays, getDayName, formatDate, getShortDayName } from "@/utils/dateUtils";
-import { cn } from "@/utils/cn";
-import MealSlot from "@/components/molecules/MealSlot";
-import Button from "@/components/atoms/Button";
+import { mealPlanService } from "@/services/api/mealPlanService";
+import { recipeService } from "@/services/api/recipeService";
+import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Empty from "@/components/ui/Empty";
-import { mealPlanService } from "@/services/api/mealPlanService";
-import { recipeService } from "@/services/api/recipeService";
-import { toast } from "react-toastify";
+import Button from "@/components/atoms/Button";
+import MealSlot from "@/components/molecules/MealSlot";
+import { formatDate, getDayName, getShortDayName, getWeekDays } from "@/utils/dateUtils";
+import { cn } from "@/utils/cn";
 
 const CalendarGrid = ({ 
   currentWeek, 
@@ -18,9 +18,9 @@ recipes = [],
   onWeekChange,
   onAddMeal
 }) => {
-  const [meals, setMeals] = useState({});
+const [meals, setMeals] = useState({});
   const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
+  const [error, setError] = useState("");
   const [recipeLookup, setRecipeLookup] = useState({});
   const [duplicateModal, setDuplicateModal] = useState({
     isOpen: false,
@@ -29,13 +29,12 @@ const [error, setError] = useState("");
   const weekDays = getWeekDays(currentWeek);
   const mealTypes = ["breakfast", "lunch", "dinner", "snacks"];
 
-useEffect(() => {
+  useEffect(() => {
     if (currentWeek) {
       loadWeekPlan();
     }
   }, [currentWeek]);
-
-  useEffect(() => {
+useEffect(() => {
     // Build recipe lookup for quick access
     const lookup = {};
     recipes.forEach(recipe => {
@@ -43,8 +42,7 @@ useEffect(() => {
     });
     setRecipeLookup(lookup);
   }, [recipes]);
-
-  const loadWeekPlan = async () => {
+const loadWeekPlan = async () => {
     if (!currentWeek) return;
     
     try {
@@ -170,10 +168,10 @@ const handleDuplicateDay = (sourceDay) => {
   if (!hasAnyMeals && recipes.length === 0) {
     return (
       <Empty
-        title="Start planning your week"
-        message="Add some recipes first, then drag them to your calendar to create your meal plan."
-        illustration="📅"
-        action={() => onWeekChange && onWeekChange("recipes")}
+title={loading ? "Loading your meal plan..." : "Start planning your week"}
+        message={loading ? "Please wait while we load your meals." : "Add some recipes first, then drag them to your calendar to create your meal plan."}
+        illustration={loading ? "⏳" : "📅"}
+        action={loading ? undefined : () => onWeekChange && onWeekChange("recipes")}
         actionText="Add Recipes"
         icon="BookOpen"
       />
