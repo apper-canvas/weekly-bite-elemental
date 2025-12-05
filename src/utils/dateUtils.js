@@ -60,20 +60,22 @@ export const formatDate = (date, formatStr = "yyyy-MM-dd") => {
 export const getDayName = (date) => {
   try {
     const validDate = validateDate(date);
-    return format(validDate, "EEEE");
+    const validFormat = validateFormatString("EEEE");
+    return format(validDate, validFormat);
   } catch (error) {
     console.warn('getDayName error:', error);
-    return format(new Date(), "EEEE");
+    return format(new Date(), validateFormatString("EEEE"));
   }
 };
 
 export const getShortDayName = (date) => {
   try {
     const validDate = validateDate(date);
-    return format(validDate, "EEE");
+    const validFormat = validateFormatString("EEE");
+    return format(validDate, validFormat);
   } catch (error) {
     console.warn('getShortDayName error:', error);
-    return format(new Date(), "EEE");
+    return format(new Date(), validateFormatString("EEE"));
   }
 };
 
@@ -92,13 +94,17 @@ export const getWeekDateRange = (weekStart) => {
   try {
     const validWeekStart = validateDate(weekStart);
     const weekEnd = addDays(validWeekStart, 6);
-    const startStr = format(validWeekStart, "MMM d");
-    const endStr = format(weekEnd, "MMM d, yyyy");
+    const startFormat = validateFormatString("MMM d");
+    const endFormat = validateFormatString("MMM d, yyyy");
+    const startStr = format(validWeekStart, startFormat);
+    const endStr = format(weekEnd, endFormat);
     return `${startStr} - ${endStr}`;
   } catch (error) {
     console.warn('getWeekDateRange error:', error);
     const fallbackStart = startOfWeek(new Date(), { weekStartsOn: 0 });
     const fallbackEnd = addDays(fallbackStart, 6);
-    return `${format(fallbackStart, "MMM d")} - ${format(fallbackEnd, "MMM d, yyyy")}`;
+    const startFormat = validateFormatString("MMM d");
+    const endFormat = validateFormatString("MMM d, yyyy");
+    return `${format(fallbackStart, startFormat)} - ${format(fallbackEnd, endFormat)}`;
   }
 };
