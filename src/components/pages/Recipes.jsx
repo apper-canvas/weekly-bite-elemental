@@ -109,20 +109,30 @@ const Recipes = () => {
     }
   };
 
-  const handleRecipeSave = (savedRecipe) => {
-    if (editingRecipe) {
-      // Update existing recipe
-      setRecipes(prev => 
-        prev.map(recipe => 
-          recipe.id === savedRecipe.id ? savedRecipe : recipe
-        )
-      );
-    } else {
-      // Add new recipe
-      setRecipes(prev => [savedRecipe, ...prev]);
+const handleRecipeSave = (savedRecipe) => {
+    try {
+      if (editingRecipe) {
+        // Update existing recipe
+        setRecipes(prev => 
+          prev.map(recipe => 
+            recipe.id === savedRecipe.id ? savedRecipe : recipe
+          )
+        );
+        console.log("Recipe updated in list:", savedRecipe.id);
+      } else {
+        // Add new recipe to the beginning of the list
+        setRecipes(prev => {
+          const updatedRecipes = [savedRecipe, ...prev];
+          console.log("Recipe added to list:", savedRecipe.id, "Total recipes:", updatedRecipes.length);
+          return updatedRecipes;
+        });
+      }
+      setIsEditModalOpen(false);
+      setEditingRecipe(null);
+    } catch (error) {
+      console.error("Failed to update recipes list:", error);
+      toast.error("Failed to update recipes list");
     }
-    setIsEditModalOpen(false);
-    setEditingRecipe(null);
   };
 
   const handleTagToggle = (tag) => {

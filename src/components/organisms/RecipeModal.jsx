@@ -176,7 +176,7 @@ const RecipeModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -200,13 +200,22 @@ const RecipeModal = ({
         image: formData.image || `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRTY3RTIyIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiNGRkYiLz4KPHN2ZyB4PSIxMzAiIHk9IjgwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRkYiPgo8cGF0aCBkPSJNMTAgMTBIMzBWMzBIMTBWMTBaTTE1IDE1VjI1SDI1VjE1SDE1WiIvPgo8L3N2Zz4KPHR4dCB4PSIxNTAiIHk9IjE2MCIgZmlsbD0iI0ZGRiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SZWNpcGU8L3R4dD4KPC9zdmc+`
       };
 
+      console.log("Submitting recipe data:", cleanData);
+
       let savedRecipe;
       if (recipe?.id) {
         savedRecipe = await recipeService.update(recipe.id, cleanData);
         toast.success("Recipe updated successfully");
+        console.log("Recipe updated:", savedRecipe);
       } else {
         savedRecipe = await recipeService.create(cleanData);
         toast.success("Recipe created successfully");
+        console.log("Recipe created:", savedRecipe);
+      }
+
+      // Ensure the saved recipe has all required properties
+      if (!savedRecipe || !savedRecipe.id) {
+        throw new Error("Invalid recipe data returned from service");
       }
 
       if (onSave) {
@@ -215,7 +224,8 @@ const RecipeModal = ({
       
       onClose();
     } catch (error) {
-      toast.error("Failed to save recipe");
+      const errorMessage = error.message || "Failed to save recipe";
+      toast.error(errorMessage);
       console.error("Failed to save recipe:", error);
     } finally {
       setLoading(false);

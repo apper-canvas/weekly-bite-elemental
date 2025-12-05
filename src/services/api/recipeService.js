@@ -92,7 +92,7 @@ class RecipeService {
     }
   }
 
-  async create(recipeData) {
+async create(recipeData) {
     await this.init();
     await this.delay();
     
@@ -110,7 +110,11 @@ class RecipeService {
       };
       
       await storage.set(this.storeName, newRecipe);
-      return { ...newRecipe };
+      
+      // Return a copy to ensure no reference issues
+      const savedRecipe = { ...newRecipe };
+      console.log("Recipe created successfully:", savedRecipe);
+      return savedRecipe;
     } catch (error) {
       console.error("Failed to create recipe:", error);
       throw new Error("Unable to save recipe");
