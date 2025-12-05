@@ -14,8 +14,9 @@ import { toast } from "react-toastify";
 
 const CalendarGrid = ({ 
   currentWeek, 
-  recipes = [],
-  onWeekChange 
+recipes = [],
+  onWeekChange,
+  onAddMeal
 }) => {
   const [meals, setMeals] = useState({});
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ const [error, setError] = useState("");
   const weekDays = getWeekDays(currentWeek);
   const mealTypes = ["breakfast", "lunch", "dinner", "snacks"];
 
-  useEffect(() => {
+useEffect(() => {
     if (currentWeek) {
       loadWeekPlan();
     }
@@ -106,7 +107,6 @@ const handleDuplicateDay = (sourceDay) => {
       sourceDay
     });
   };
-
   const handleDuplicateConfirm = async (fromDay, toDay) => {
     try {
       await mealPlanService.copyDay(currentWeek, fromDay, toDay);
@@ -242,8 +242,9 @@ const handleDuplicateDay = (sourceDay) => {
                     day={dayStr}
                     mealType={mealType}
                     recipe={recipe}
-                    onDrop={handleDrop}
+onDrop={handleDrop}
                     onRemove={handleRemoveMeal}
+                    onAdd={onAddMeal}
                   />
                 ))}
               </div>
@@ -312,8 +313,9 @@ key={dayStr}
                     day={dayStr}
                     mealType={mealType}
                     recipe={recipe}
-                    onDrop={handleDrop}
+onDrop={handleDrop}
                     onRemove={handleRemoveMeal}
+                    onAdd={onAddMeal}
                   />
                 ))}
               </div>

@@ -10,8 +10,8 @@ const MealSlot = ({
   recipe, 
   onDrop, 
   onRemove,
-  onAdd,
-  className 
+onAdd,
+  className
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -43,7 +43,7 @@ const MealSlot = ({
     }
   };
 
-  const handleAdd = () => {
+const handleAdd = () => {
     if (onAdd) {
       onAdd(day, mealType);
     }
@@ -77,7 +77,7 @@ const MealSlot = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={!recipe ? handleAdd : undefined}
+onClick={!recipe ? handleAdd : undefined}
       >
         {recipe ? (
           <motion.div

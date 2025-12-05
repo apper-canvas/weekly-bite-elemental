@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getWeekStart, getWeekDateRange } from "@/utils/dateUtils";
-import CalendarGrid from "@/components/organisms/CalendarGrid";
-import FavoritesSidebar from "@/components/organisms/FavoritesSidebar";
-import Button from "@/components/atoms/Button";
+import RecipeSelectionModal from "@/components/organisms/RecipeSelectionModal";
+import { recipeService } from "@/services/api/recipeService";
+import { mealPlanService } from "@/services/api/mealPlanService";
+import { addDays, subDays } from "date-fns";
+import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
-import { recipeService } from "@/services/api/recipeService";
-import { addDays, subDays } from "date-fns";
+import Button from "@/components/atoms/Button";
+import CalendarGrid from "@/components/organisms/CalendarGrid";
+import FavoritesSidebar from "@/components/organisms/FavoritesSidebar";
+import { getWeekDateRange, getWeekStart } from "@/utils/dateUtils";
 
 const Calendar = () => {
   const [currentWeek, setCurrentWeek] = useState(getWeekStart());
@@ -16,6 +19,39 @@ const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [recipeSelectionModal, setRecipeSelectionModal] = useState({
+    isOpen: false,
+    day: null,
+    mealType: null
+  });
+
+  const handleAddMeal = (day, mealType) => {
+    setRecipeSelectionModal({
+      isOpen: true,
+      day,
+      mealType
+    });
+  };
+
+  const handleCloseRecipeSelection = () => {
+    setRecipeSelectionModal({
+      isOpen: false,
+      day: null,
+      mealType: null
+    });
+  };
+
+  const handleSelectRecipe = async (recipe, day, mealType) => {
+    try {
+      await mealPlanService.addMeal(currentWeek, day, mealType, recipe.id);
+      setRefreshKey(prev => prev + 1);
+      toast.success(`${recipe.name} added to ${mealType} for ${day}`);
+      handleCloseRecipeSelection();
+    } catch (error) {
+      toast.error("Failed to add meal to calendar");
+    }
+  };
 
   useEffect(() => {
     loadRecipes();
@@ -51,7 +87,7 @@ const Calendar = () => {
     return <Loading type="calendar" />;
   }
 
-  if (error) {
+if (error) {
     return (
       <ErrorView
         title="Failed to load calendar"
@@ -133,10 +169,11 @@ const Calendar = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       >
-        <CalendarGrid
+<CalendarGrid
           currentWeek={currentWeek}
           recipes={recipes}
-          onWeekChange={setCurrentWeek}
+          refreshKey={refreshKey}
+          onAddMeal={handleAddMeal}
         />
       </motion.div>
 
@@ -147,10 +184,19 @@ const Calendar = () => {
         className="lg:right-6"
       />
 
+{/* Recipe Selection Modal */}
+      <RecipeSelectionModal
+        isOpen={recipeSelectionModal.isOpen}
+        onClose={handleCloseRecipeSelection}
+        onSelectRecipe={handleSelectRecipe}
+        day={recipeSelectionModal.day}
+        mealType={recipeSelectionModal.mealType}
+      />
+
       {/* Mobile Spacing for Bottom Navigation */}
       <div className="h-20 md:h-0" />
     </div>
-  );
+);
 };
 
 export default Calendar;
