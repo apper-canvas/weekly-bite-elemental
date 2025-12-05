@@ -38,15 +38,34 @@ class MealPlanService {
     }
   }
 
-  async saveWeekPlan(weekStart, meals) {
+async saveWeekPlan(weekStart, meals) {
     await this.init();
     await this.delay();
     
     try {
       const weekKey = formatDate(weekStart);
+      
+      // Defensive validation: ensure meals is iterable
+      let validatedMeals;
+      if (meals == null) {
+        validatedMeals = {};
+      } else if (Array.isArray(meals)) {
+        validatedMeals = [...meals];
+      } else if (typeof meals === 'object' && meals[Symbol.iterator]) {
+        // Handle other iterables (Set, Map, etc.)
+        validatedMeals = [...meals];
+      } else if (typeof meals === 'object') {
+        // If meals is a plain object, preserve it as-is
+        validatedMeals = { ...meals };
+      } else {
+        // For primitive values or other non-iterable types, default to empty object
+        console.warn(`Expected meals to be iterable or object, got ${typeof meals}:`, meals);
+        validatedMeals = {};
+      }
+      
       const weekPlan = {
         weekStart: weekKey,
-        meals: [...meals],
+        meals: validatedMeals,
         updatedAt: new Date().toISOString()
       };
       
