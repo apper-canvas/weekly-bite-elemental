@@ -1,18 +1,27 @@
 import { format, startOfWeek, addDays, isSameWeek, isValid } from "date-fns";
 
-// Helper function to validate date input
+// Helper function to validate date input and prevent undefined values reaching date-fns
 const validateDate = (date) => {
+  // Return current date if input is null, undefined, or falsy
   if (!date) return new Date();
+  
+  // If input is not a Date object, try to parse it
   if (!(date instanceof Date)) {
     const parsed = new Date(date);
     return isValid(parsed) ? parsed : new Date();
   }
+  
+  // Return input if it's a valid Date, otherwise return current date
   return isValid(date) ? date : new Date();
 };
 
-// Helper function to validate format string
+// Helper function to validate format string and prevent undefined format strings
 const validateFormatString = (formatStr) => {
-  return formatStr && typeof formatStr === 'string' && formatStr.trim() ? formatStr : 'yyyy-MM-dd';
+  // Return default format if formatStr is null, undefined, empty, or not a string
+  if (!formatStr || typeof formatStr !== 'string' || !formatStr.trim()) {
+    return 'yyyy-MM-dd';
+  }
+  return formatStr;
 };
 
 export const getWeekStart = (date = new Date()) => {
@@ -43,6 +52,7 @@ export const formatDate = (date, formatStr = "yyyy-MM-dd") => {
     return format(validDate, validFormat);
   } catch (error) {
     console.warn('formatDate error:', error);
+    // Fallback with guaranteed valid inputs
     return format(new Date(), 'yyyy-MM-dd');
   }
 };
